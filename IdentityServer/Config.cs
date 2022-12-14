@@ -2,11 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using IdentityServer4;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace IdentityServer
@@ -67,7 +65,7 @@ namespace IdentityServer
                     },
                     PostLogoutRedirectUris = { "https://localhost:5003/index.html" },
                     AllowedCorsOrigins = { "https://localhost:5003" },
-                    AllowedScopes = { "openid", "profile", "identity.api" , "custom" }
+                    AllowedScopes = { IdentityServerConstants.StandardScopes.OpenId,"custom" }
                 }
             };
         }

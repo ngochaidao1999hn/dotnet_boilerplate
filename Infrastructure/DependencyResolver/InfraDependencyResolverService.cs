@@ -32,18 +32,30 @@ namespace Infrastructure.DependencyResolver
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEmailService, EmailService>();
-               
-            services.AddAuthentication(options =>
+            services.AddAuthentication("Bearer").AddJwtBearer("Bearer",options =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddIdentityServerAuthentication(opt =>
-            {
-                opt.RequireHttpsMetadata = false;
-                opt.Authority = Configuration["JWT:Authority"]; // IdP
-                opt.ApiName = "custom"; //  api resource name
-                opt.ApiSecret = Configuration["JWT:Secret"];
+                options.Authority = Configuration["JWT:Authority"];
+                options.RequireHttpsMetadata = false;
+                options.Audience = "custom";
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ////////////////////////////////////////////////////////
+                    // The following made the difference.  
+                    ////////////////////////////////////////////////////////
+                    ValidateAudience = false,
+                };
             });
+            //services.AddAuthentication(options =>
+            //{
+            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //}).AddIdentityServerAuthentication(opt =>
+            //{
+            //    opt.RequireHttpsMetadata = false;
+            //    opt.Authority = Configuration["JWT:Authority"]; // IdP
+            //    opt.ApiName = "custom"; //  api resource name
+            //    opt.ApiSecret = Configuration["JWT:Secret"];
+            //});
             services.AddHangfire(x =>
             {
                 x.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
