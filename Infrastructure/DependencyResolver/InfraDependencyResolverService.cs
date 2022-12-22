@@ -1,23 +1,17 @@
-﻿using Domain.Interfaces;
+﻿using Application.Services.Interfaces;
+using Domain.Interfaces;
 using Hangfire;
-using Hangfire.MemoryStorage;
-using Hangfire.MySql;
-using Hangfire.Redis;
-using IdentityServer4.AccessTokenValidation;
 using Infrastructure.Hangfire.Jobs;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Infrastructure.Services.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace Infrastructure.DependencyResolver
 {
@@ -32,6 +26,10 @@ namespace Infrastructure.DependencyResolver
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped(typeof(ICachingService<>), typeof(CachingService<>));
+            services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<BoilerPlateDbContext>();
+            services.AddScoped<IIdentityService, IdentityService>();
             services.AddAuthentication("Bearer").AddJwtBearer("Bearer",options =>
             {
                 options.Authority = Configuration["JWT:Authority"];
@@ -39,42 +37,20 @@ namespace Infrastructure.DependencyResolver
                 options.Audience = "custom";
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ////////////////////////////////////////////////////////
-                    // The following made the difference.  
-                    ////////////////////////////////////////////////////////
                     ValidateAudience = false,
                 };
             });
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //}).AddIdentityServerAuthentication(opt =>
-            //{
-            //    opt.RequireHttpsMetadata = false;
-            //    opt.Authority = Configuration["JWT:Authority"]; // IdP
-            //    opt.ApiName = "custom"; //  api resource name
-            //    opt.ApiSecret = Configuration["JWT:Secret"];
-            //});
+            //Hangfire
             services.AddHangfire(x =>
             {
                 x.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                //.UseStorage(
-                //    new MySqlStorage(
-                //        Configuration.GetConnectionString("MyConnectionString"),
-                //        new MySqlStorageOptions
-                //        {
-                //            TablesPrefix = "Hangfire"
-                //        }
-                //    )
-                //);
-                //.UseMemoryStorage();
                 .UseRedisStorage(Configuration["REDIS:ConnectionString"]);
             });
             services.AddHangfireServer();
-            //RecurringJob.AddOrUpdate<Jobs>("RecurringSendGetRequest", x => x.SendGetRequest(), Cron.Minutely());
+            //Config Redis for caching
+            services.AddStackExchangeRedisCache(options => { options.Configuration = Configuration["REDIS:ConnectionString"]; });
         }
         public static void Configure() 
         {

@@ -22,8 +22,8 @@
   <ItemGroup>
     <Folder Include="Commands\AuthenticationCommands\" />
     <Folder Include="Mapper\" />
+    <Folder Include="Helper\" />
     <Folder Include="Queries\AuthenticationQueries\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>
