@@ -1,4 +1,5 @@
 ﻿using Application.Services.Interfaces;
+using Domain.Entities;
 using Domain.Interfaces;
 using Hangfire;
 using Infrastructure.Hangfire.Jobs;
@@ -27,7 +28,7 @@ namespace Infrastructure.DependencyResolver
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped(typeof(ICachingService<>), typeof(CachingService<>));
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<BoilerPlateDbContext>();
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddAuthentication("Bearer").AddJwtBearer("Bearer",options =>

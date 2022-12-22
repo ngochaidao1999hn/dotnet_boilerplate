@@ -1,7 +1,7 @@
 ﻿using Application.Models;
+using Application.Services.Interfaces;
 using Domain.Entities;
 using Infrastructure;
-using Infrastructure.Services;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text;
