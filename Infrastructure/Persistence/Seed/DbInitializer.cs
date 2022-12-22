@@ -1,5 +1,4 @@
-﻿using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Seed
 {
@@ -11,6 +10,5 @@ namespace Infrastructure.Persistence.Seed
         {
             this.modelBuilder = modelBuilder;
         }
-
     }
 }

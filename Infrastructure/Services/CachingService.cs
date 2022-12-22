@@ -8,14 +8,16 @@ namespace Infrastructure.Services
     public class CachingService<T> : ICachingService<T> where T : class
     {
         private readonly IDistributedCache _cache;
+
         public CachingService(IDistributedCache cache)
         {
             _cache = cache;
         }
+
         public async Task<IList<T>> GetData(string key)
         {
-            byte[] data = await _cache.GetAsync(key);
-            IList<T> list = null;
+            byte[]? data = await _cache.GetAsync(key);
+            IList<T>? list = null;
             if (data != null)
             {
                 var cachedDataString = Encoding.UTF8.GetString(data);
@@ -24,7 +26,7 @@ namespace Infrastructure.Services
             return list;
         }
 
-        public async Task SetData(string key, byte[] data, DistributedCacheEntryOptions options = null)
+        public async Task SetData(string key, byte[] data, DistributedCacheEntryOptions options)
         {
             await _cache.SetAsync(key, data, options);
         }

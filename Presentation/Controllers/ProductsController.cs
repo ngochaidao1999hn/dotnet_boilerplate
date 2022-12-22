@@ -3,7 +3,6 @@ using Application.Dtos.Product;
 using Application.Queries.ProductQueries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -14,13 +13,15 @@ namespace Presentation.Controllers
     public class ProductsController : BaseController
     {
         private readonly IMediator _mediator;
+
         public ProductsController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get() {
+        public async Task<IActionResult> Get()
+        {
             var res = await _mediator.Send(new GetProductsQuery());
             if (res.Success)
             {
@@ -30,7 +31,8 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AddProductDto model) {
+        public async Task<IActionResult> Create([FromBody] AddProductDto model)
+        {
             var res = await _mediator.Send(new AddProductRequest(model));
             if (res.Success)
             {

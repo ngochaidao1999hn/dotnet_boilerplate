@@ -11,12 +11,13 @@ using System.Text;
 
 namespace Infrastructure.Services.Identity
 {
-    public class IdentityService: IIdentityService
+    public class IdentityService : IIdentityService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
         private readonly IAuthorizationService _authorizationService;
         private readonly IConfiguration _configuration;
+
         public IdentityService(
             UserManager<ApplicationUser> userManager,
             IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
@@ -34,6 +35,7 @@ namespace Infrastructure.Services.Identity
             var users = await _userManager.Users.ToListAsync();
             return users;
         }
+
         public async Task<string?> GetUserNameAsync(int userId)
         {
             var user = await _userManager.Users.FirstAsync(u => u.Id == userId);
@@ -91,7 +93,7 @@ namespace Infrastructure.Services.Identity
                 res.accessToken = stringToken;
                 res.expiredDate = expDate;
             }
-            
+
             return res;
         }
 

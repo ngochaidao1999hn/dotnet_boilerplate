@@ -1,6 +1,5 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -13,8 +12,9 @@ namespace Presentation.Controllers
         public TestHangFireController()
         {
         }
+
         [HttpGet]
-        public async Task AddHangFire() 
+        public async Task AddHangFire()
         {
             RecurringJob.AddOrUpdate("test", () => Console.WriteLine("HAHA"), Cron.Minutely);
         }

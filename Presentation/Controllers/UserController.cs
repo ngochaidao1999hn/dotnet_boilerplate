@@ -2,7 +2,6 @@
 using Application.Dtos.Identity;
 using Application.Queries.AuthenticationQueries;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -25,8 +24,10 @@ namespace Presentation.Controllers
         #endregion ctor
 
         #region methods
+
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto login) {
+        public async Task<IActionResult> Login([FromBody] LoginDto login)
+        {
             var token = await _mediator.Send(new LoginQuery(login));
             if (token.accessToken == null)
                 return BadRequest("Username/Password not correct");
@@ -41,6 +42,7 @@ namespace Presentation.Controllers
                 return BadRequest();
             return Ok();
         }
+
         #endregion methods
     }
 }

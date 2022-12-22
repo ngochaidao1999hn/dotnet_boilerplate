@@ -35,7 +35,7 @@ namespace Application.Queries.ProductQueries
                     res.responseOk(listData: cachedData);
                 }
                 else
-                { 
+                {
                     var data = await _unitOfWork.GetRepository<Product>().Get();
                     string cachedDataString = JsonSerializer.Serialize(data);
                     var dataToCache = Encoding.UTF8.GetBytes(cachedDataString);
@@ -46,7 +46,7 @@ namespace Application.Queries.ProductQueries
                     res.responseOk(listData: data.ToList());
                 }
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 res.ResponseError(message: ex.Message);
             }

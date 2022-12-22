@@ -4,6 +4,7 @@
     {
         /// <summary>
         ///KHÔNG HOẠT ĐỘNG !!! ĐỪNG DÙNG
+        ///ĐỂ ĐÂY CHO ĐẸP
         /// </summary>
         void SendByMailKit(string to, string subject, string html, string from = null);
 

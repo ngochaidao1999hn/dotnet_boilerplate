@@ -63,4 +63,3 @@ app.MapControllers();
 InfraDependencyResolverService.Configure();
 
 app.Run();
-

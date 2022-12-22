@@ -8,7 +8,6 @@ using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
 using Infrastructure.Services.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -29,20 +28,10 @@ namespace Infrastructure.DependencyResolver
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped(typeof(ICachingService<>), typeof(CachingService<>)); 
+            services.AddScoped(typeof(ICachingService<>), typeof(CachingService<>));
             services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<BoilerPlateDbContext>();
             services.AddScoped<IIdentityService, IdentityService>();
-            //services.AddAuthentication("Bearer").AddJwtBearer("Bearer",options =>
-            //{
-            //    options.Authority = Configuration["JWT:Authority"];
-            //    options.RequireHttpsMetadata = false;
-            //    options.Audience = "custom";
-            //    options.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateAudience = false,
-            //    };
-            //});
             services.AddAuthentication(option =>
             {
                 option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -74,11 +63,12 @@ namespace Infrastructure.DependencyResolver
             //Config Redis for caching
             services.AddStackExchangeRedisCache(options => { options.Configuration = Configuration["REDIS:ConnectionString"]; });
         }
-        public static void Configure() 
+
+        public static void Configure()
         {
             RecurringJob.AddOrUpdate<Jobs>("g1", job => job.SendGetRequest(), Cron.Minutely());
         }
-      
+
         public class MysqlEntityFrameworkDesignTimeServices : IDesignTimeServices
         {
             public void ConfigureDesignTimeServices(IServiceCollection serviceCollection)
@@ -88,6 +78,5 @@ namespace Infrastructure.DependencyResolver
                     .TryAddCoreServices();
             }
         }
-
     }
 }
