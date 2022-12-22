@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Models;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,13 @@ namespace Application.Services.Interfaces
 
         Task<bool> IsInRoleAsync(int userId, string role);
 
-        Task<bool> AuthorizeAsync(int userId, string policyName);
+        Task<AuthenticationResponse> AuthorizeAsync(string userName, string password);
 
         Task<bool> CreateUserAsync(string userName, string password);
 
         Task<bool> DeleteUserAsync(int userId);
 
         Task<List<ApplicationUser>> GetListUsers();
+
     }
 }

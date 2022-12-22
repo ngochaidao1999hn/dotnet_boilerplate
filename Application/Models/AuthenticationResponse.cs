@@ -1,4 +1,4 @@
-﻿namespace Application.Dtos.Identity
+﻿namespace Application.Models
 {
     public class AuthenticationResponse
     {

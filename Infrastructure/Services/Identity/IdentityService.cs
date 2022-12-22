@@ -1,8 +1,13 @@
-﻿using Application.Services.Interfaces;
+﻿using Application.Models;
+using Application.Services.Interfaces;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System.Data.Entity;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace Infrastructure.Services.Identity
 {
@@ -11,14 +16,17 @@ namespace Infrastructure.Services.Identity
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
         private readonly IAuthorizationService _authorizationService;
+        private readonly IConfiguration _configuration;
         public IdentityService(
             UserManager<ApplicationUser> userManager,
             IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
             _authorizationService = authorizationService;
+            _configuration = configuration;
         }
 
         public async Task<List<ApplicationUser>> GetListUsers()
@@ -53,20 +61,38 @@ namespace Infrastructure.Services.Identity
             return user != null && await _userManager.IsInRoleAsync(user, role);
         }
 
-        public async Task<bool> AuthorizeAsync(int userId, string policyName)
+        public async Task<AuthenticationResponse> AuthorizeAsync(string userName, string password)
         {
-            var user = _userManager.Users.SingleOrDefault(u => u.Id == userId);
+            AuthenticationResponse res = new AuthenticationResponse();
+            ApplicationUser user = _userManager.Users.SingleOrDefault(u => u.UserName == userName);
 
             if (user == null)
             {
-                return false;
+                res.accessToken = null;
             }
-
-            var principal = await _userClaimsPrincipalFactory.CreateAsync(user);
-
-            var result = await _authorizationService.AuthorizeAsync(principal, policyName);
-
-            return result.Succeeded;
+            if (await _userManager.CheckPasswordAsync(user, password))
+            {
+                var userClaimPrincipals = await _userClaimsPrincipalFactory.CreateAsync(user);
+                var claims = userClaimPrincipals.Claims;
+                var issuer = _configuration["JWT:Issuer"];
+                var audience = _configuration["JWT:Audience"];
+                var securityKey = new SymmetricSecurityKey
+                (Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
+                var credentials = new SigningCredentials(securityKey,
+                SecurityAlgorithms.HmacSha256);
+                var expDate = DateTime.Now.AddDays(1);
+                var token = new JwtSecurityToken(issuer: issuer,
+                    audience: audience,
+                    signingCredentials: credentials,
+                    claims: claims,
+                    expires: expDate);
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var stringToken = tokenHandler.WriteToken(token);
+                res.accessToken = stringToken;
+                res.expiredDate = expDate;
+            }
+            
+            return res;
         }
 
         public async Task<bool> DeleteUserAsync(int userId)

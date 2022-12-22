@@ -7,12 +7,14 @@ using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
 using Infrastructure.Services.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Infrastructure.DependencyResolver
 {
@@ -27,18 +29,37 @@ namespace Infrastructure.DependencyResolver
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped(typeof(ICachingService<>), typeof(CachingService<>));
+            services.AddScoped(typeof(ICachingService<>), typeof(CachingService<>)); 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<BoilerPlateDbContext>();
             services.AddScoped<IIdentityService, IdentityService>();
-            services.AddAuthentication("Bearer").AddJwtBearer("Bearer",options =>
+            //services.AddAuthentication("Bearer").AddJwtBearer("Bearer",options =>
+            //{
+            //    options.Authority = Configuration["JWT:Authority"];
+            //    options.RequireHttpsMetadata = false;
+            //    options.Audience = "custom";
+            //    options.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateAudience = false,
+            //    };
+            //});
+            services.AddAuthentication(option =>
             {
-                options.Authority = Configuration["JWT:Authority"];
-                options.RequireHttpsMetadata = false;
-                options.Audience = "custom";
+                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["JWT:Issuer"],
+                    ValidAudience = Configuration["JWT:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                       Encoding.UTF8.GetBytes(Configuration["JWT:key"]))
                 };
             });
             //Hangfire
