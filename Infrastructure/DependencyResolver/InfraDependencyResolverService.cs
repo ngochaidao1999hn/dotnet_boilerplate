@@ -22,7 +22,7 @@ namespace Infrastructure.DependencyResolver
         public static void Register(IServiceCollection services, IConfiguration Configuration)
         {
             var connectionString = Configuration.GetConnectionString("MyConnectionString");
-            var serverVersion = new MySqlServerVersion(new Version(8, 0, 29));
+            var serverVersion = new MySqlServerVersion(ServerVersion.AutoDetect(connectionString));
             services.AddDbContext<BoilerPlateDbContext>(opt => opt.UseMySql(connectionString, serverVersion));
 
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -32,6 +32,7 @@ namespace Infrastructure.DependencyResolver
             services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<BoilerPlateDbContext>();
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IProductService, ProductService>();
             services.AddAuthentication(option =>
             {
                 option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -64,6 +65,7 @@ namespace Infrastructure.DependencyResolver
             services.AddStackExchangeRedisCache(options => { options.Configuration = Configuration["REDIS:ConnectionString"]; });
         }
 
+        //Register Jobs
         public static void Configure()
         {
             RecurringJob.AddOrUpdate<Jobs>("g1", job => job.SendGetRequest(), Cron.Minutely());

@@ -1,5 +1,7 @@
-﻿using Application.Models;
+﻿using Application.Dtos.Product;
+using Application.Models;
 using Application.Services.Interfaces;
+using AutoMapper;
 using Domain.Entities;
 using Infrastructure;
 using MediatR;
@@ -9,48 +11,24 @@ using System.Text.Json;
 
 namespace Application.Queries.ProductQueries
 {
-    public class GetProductsQuery : IRequest<ApiResponse<Product>>
+    public class GetProductsQuery : IRequest<IEnumerable<ProductReadDto>>
     {
     }
 
-    public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, ApiResponse<Product>>
+    public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, IEnumerable<ProductReadDto>>
     {
-        private IUnitOfWork _unitOfWork;
-        private ICachingService<Product> _cachingService;
+        private readonly IProductService _productService;
+        private readonly IMapper _mapper;
 
-        public GetProductsQueryHandler(IUnitOfWork unitOfWork, ICachingService<Product> cachingService)
+        public GetProductsQueryHandler(IProductService productService, IMapper mapper)
         {
-            _unitOfWork = unitOfWork;
-            _cachingService = cachingService;
+            _productService = productService;
+            _mapper = mapper;
         }
 
-        public async Task<ApiResponse<Product>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ProductReadDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
         {
-            ApiResponse<Product> res = new ApiResponse<Product>();
-            try
-            {
-                var cachedData = await _cachingService.GetData("products");
-                if (cachedData != null)
-                {
-                    res.responseOk(listData: cachedData);
-                }
-                else
-                {
-                    var data = await _unitOfWork.GetRepository<Product>().Get();
-                    string cachedDataString = JsonSerializer.Serialize(data);
-                    var dataToCache = Encoding.UTF8.GetBytes(cachedDataString);
-                    DistributedCacheEntryOptions options = new DistributedCacheEntryOptions()
-                           .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
-                           .SetSlidingExpiration(TimeSpan.FromMinutes(3));
-                    await _cachingService.SetData("products", dataToCache, options);
-                    res.responseOk(listData: data.ToList());
-                }
-            }
-            catch (Exception ex)
-            {
-                res.ResponseError(message: ex.Message);
-            }
-            return res;
+            return  _mapper.Map<IEnumerable<ProductReadDto>>(await _productService.GetAll());
         }
     }
 }

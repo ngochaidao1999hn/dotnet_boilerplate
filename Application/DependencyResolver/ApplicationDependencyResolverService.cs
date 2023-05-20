@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using System.Reflection;
 
 namespace Application.DependencyResolver
 {
@@ -16,6 +17,7 @@ namespace Application.DependencyResolver
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
             services.AddOptions();
             services.AddMediatR(typeof(LibraryEntrypoint).Assembly);
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
         }
     }
 }

@@ -14,14 +14,14 @@ namespace Infrastructure.Services
             _cache = cache;
         }
 
-        public async Task<IList<T>> GetData(string key)
+        public async Task<IEnumerable<T>> GetData(string key)
         {
             byte[]? data = await _cache.GetAsync(key);
-            IList<T>? list = null;
+            IEnumerable<T>? list = null;
             if (data != null)
             {
                 var cachedDataString = Encoding.UTF8.GetString(data);
-                list = JsonSerializer.Deserialize<IList<T>>(cachedDataString);
+                list = JsonSerializer.Deserialize<IEnumerable<T>>(cachedDataString);
             }
             return list;
         }

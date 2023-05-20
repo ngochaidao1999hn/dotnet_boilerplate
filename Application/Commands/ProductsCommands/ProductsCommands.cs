@@ -1,41 +1,30 @@
 ﻿using Application.Dtos.Product;
 using Application.Models;
+using Application.Services.Interfaces;
+using AutoMapper;
 using Domain.Entities;
 using Infrastructure;
 using MediatR;
 
 namespace Application.Commands.ProductsCommands
 {
-    public record AddProductRequest(AddProductDto model) : IRequest<ApiResponse<Product>>;
+    public record AddProductRequest(AddProductDto model) : IRequest<Product>;
 
-    public class AddProductRequestHandler : IRequestHandler<AddProductRequest, ApiResponse<Product>>
+    public class AddProductRequestHandler : IRequestHandler<AddProductRequest, Product>
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IProductService _productService;
+        private readonly IMapper _mapper;
 
-        public AddProductRequestHandler(IUnitOfWork unitOfWork)
+        public AddProductRequestHandler(IProductService productService, IMapper mapper)
         {
-            _unitOfWork = unitOfWork;
+            _productService = productService;
+            _mapper = mapper;
         }
 
-        public async Task<ApiResponse<Product>> Handle(AddProductRequest request, CancellationToken cancellationToken)
+        public async Task<Product> Handle(AddProductRequest request, CancellationToken cancellationToken)
         {
-            ApiResponse<Product> res = new ApiResponse<Product>();
-            Product p = new Product();
-            p.Name = request.model.Name;
-            p.Description = request.model.Description;
-            p.Quantity = request.model.Quantity;
-            try
-            {
-                await _unitOfWork.GetRepository<Product>().Create(p);
-                await _unitOfWork.CommitTransactionAsync();
-                res.ResponseOk();
-            }
-            catch (Exception ex)
-            {
-                await _unitOfWork.RollBackTransactionAsync();
-                res.ResponseError(message: ex.Message);
-            }
-            return res;
+            var p = _mapper.Map<Product>(request.model);
+            return await _productService.Insert(p);            
         }
     }
 }

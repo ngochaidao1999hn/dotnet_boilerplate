@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Entities;
+using Domain.Interfaces;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Repositories;
 
@@ -15,9 +16,13 @@ namespace Infrastructure
             _context = context;
         }
 
-        public async Task<int> CommitTransactionAsync(CancellationToken cancellationToken = default, Guid? internalCommandId = null)
+        public async Task<bool> CommitTransactionAsync(CancellationToken cancellationToken = default, Guid? internalCommandId = null)
         {
-            return await _context.SaveChangesAsync();
+            if (await _context.SaveChangesAsync() > 0)
+            {
+                return true;
+            }
+            return false;
         }
 
         public async Task RollBackTransactionAsync()
@@ -25,7 +30,7 @@ namespace Infrastructure
             await _context.Database.RollbackTransactionAsync();
         }
 
-        public IRepository<T> GetRepository<T>() where T : class, IAggregateRoot
+        public IRepository<T> GetRepository<T>() where T : BaseEntity, IAggregateRoot
         {
             string typeName = typeof(T).Name;
             if (repositories.Keys.Contains(typeName))

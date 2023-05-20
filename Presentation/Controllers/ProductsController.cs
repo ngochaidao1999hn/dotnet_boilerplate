@@ -22,23 +22,26 @@ namespace Presentation.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var res = await _mediator.Send(new GetProductsQuery());
-            if (res.Success)
+            try 
             {
+                var res = await _mediator.Send(new GetProductsQuery());
                 return Ok(res);
-            }
-            return BadRequest(res);
+            } 
+            catch (Exception e)
+            { 
+                return BadRequest(e.Message);
+            }                      
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AddProductDto model)
         {
             var res = await _mediator.Send(new AddProductRequest(model));
-            if (res.Success)
+            if (res is not null)
             {
                 return Ok(res);
             }
-            return BadRequest(res);
+            return BadRequest();
         }
     }
 }

@@ -1,17 +1,18 @@
-﻿using System.Linq.Expressions;
+﻿using Domain.Entities;
+using System.Linq.Expressions;
 
 namespace Domain.Interfaces
 {
-    public interface IRepository<T> where T : class, IAggregateRoot
+    public interface IRepository<T> where T : BaseEntity, IAggregateRoot
     {
-        Task Create(T entity);
+        Task<T> CreateAsync(T entity);
 
         void Update(T entity);
 
-        Task<T> GetById(int id);
+        Task<T> GetByIdAsync(int id);
 
         void Delete(int id);
 
-        Task<IQueryable<T>> Get(Expression<Func<T, bool>> filter = null, string[] includeProperties = null);
+        Task<IQueryable<T>> GetAsync(Expression<Func<T, bool>>? filter = null, string[]? includeProperties = null);
     }
 }

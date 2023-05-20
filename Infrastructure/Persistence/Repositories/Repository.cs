@@ -1,11 +1,12 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Entities;
+using Domain.Interfaces;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Persistence.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : class, IAggregateRoot
+    public class Repository<T> : IRepository<T> where T : BaseEntity, IAggregateRoot
     {
         protected BoilerPlateDbContext _context { get; set; }
         protected DbSet<T> dbSet;
@@ -16,9 +17,10 @@ namespace Infrastructure.Persistence.Repositories
             this.dbSet = context.Set<T>();
         }
 
-        public async Task Create(T entity)
+        public async Task<T> CreateAsync(T entity)
         {
-            await dbSet.AddAsync(entity);
+            var res =  await dbSet.AddAsync(entity);
+            return res.Entity;
         }
 
         public void Delete(int id)
@@ -27,7 +29,7 @@ namespace Infrastructure.Persistence.Repositories
             _context.Remove(entityToDelete);
         }
 
-        public async Task<IQueryable<T>> Get(Expression<Func<T, bool>> filter = null, string[] includeProperties = null)
+        public async Task<IQueryable<T>> GetAsync(Expression<Func<T, bool>>? filter = null, string[]? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
             if (filter != null)
@@ -45,7 +47,7 @@ namespace Infrastructure.Persistence.Repositories
             return data.AsQueryable();
         }
 
-        public async Task<T> GetById(int id)
+        public async Task<T> GetByIdAsync(int id)
         {
             return await dbSet.FindAsync(id);
         }
