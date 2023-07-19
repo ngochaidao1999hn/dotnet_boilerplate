@@ -9,12 +9,16 @@ namespace Infrastructure.Persistence.Repositories
     public class Repository<T> : IRepository<T> where T : BaseEntity, IAggregateRoot
     {
         protected BoilerPlateDbContext _context { get; set; }
+
+        public IQueryable<T> Table { get; }
+
         protected DbSet<T> dbSet;
 
         public Repository(BoilerPlateDbContext context)
         {
             _context = context;
             this.dbSet = context.Set<T>();
+            Table = this.dbSet.AsNoTracking();
         }
 
         public async Task<T> CreateAsync(T entity)
@@ -25,8 +29,11 @@ namespace Infrastructure.Persistence.Repositories
 
         public void Delete(int id)
         {
-            T entityToDelete = dbSet.Find(id);
-            _context.Remove(entityToDelete);
+            T? entityToDelete = dbSet.Find(id);
+            if (entityToDelete is not null)
+            {
+                _context.Remove(entityToDelete);
+            }
         }
 
         public async Task<IQueryable<T>> GetAsync(Expression<Func<T, bool>>? filter = null, string[]? includeProperties = null)
@@ -47,7 +54,7 @@ namespace Infrastructure.Persistence.Repositories
             return data.AsQueryable();
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(int id)
         {
             return await dbSet.FindAsync(id);
         }

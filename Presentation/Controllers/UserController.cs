@@ -2,6 +2,7 @@
 using Application.Dtos.Identity;
 using Application.Queries.AuthenticationQueries;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -38,9 +39,19 @@ namespace Presentation.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterDto register)
         {
             var res = await _mediator.Send(new RegisterCommand(register));
-            if (!res)
-                return BadRequest();
-            return Ok();
+            if (res.Succeeded)
+            {
+                return Ok();
+            }
+            else
+            {
+                var errors = new List<string>(); 
+                foreach (IdentityError? error in res.Errors)
+                {
+                    errors.Add(error.Description);
+                }
+                return BadRequest(errors);
+            }
         }
 
         #endregion methods

@@ -1,5 +1,6 @@
 ﻿using Application.Models;
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace Application.Services.Interfaces
 {
@@ -11,7 +12,7 @@ namespace Application.Services.Interfaces
 
         Task<AuthenticationResponse> AuthorizeAsync(string userName, string password);
 
-        Task<bool> CreateUserAsync(string userName, string password);
+        Task<IdentityResult> CreateUserAsync(string userName, string password);
 
         Task<bool> DeleteUserAsync(int userId);
 

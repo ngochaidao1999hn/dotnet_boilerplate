@@ -18,27 +18,27 @@ namespace Infrastructure.Services
 
         public async Task<bool> Delete(int id)
         {
-            _unitOfWork.GetRepository<Product>().Delete(id);
+            _unitOfWork.productRepository.Delete(id);
             return await _unitOfWork.CommitTransactionAsync();
         }
 
         public async Task<IEnumerable<Product>> GetAll()
         {
 
-            var data = await _unitOfWork.GetRepository<Product>().GetAsync();
+            var data = await _unitOfWork.productRepository.GetAsync();
             return data;
         }
 
         public async Task<Product> Insert(Product product)
         {
-            var entity = await _unitOfWork.GetRepository<Product>().CreateAsync(product);
+            var entity = await _unitOfWork.productRepository.CreateAsync(product);
             await _unitOfWork.CommitTransactionAsync();
             return entity;
         }
 
         public async Task<bool> Update(Product product)
         {
-            _unitOfWork.GetRepository<Product>().Update(product);
+            _unitOfWork.productRepository.Update(product);
             return await _unitOfWork.CommitTransactionAsync();
         }
     }

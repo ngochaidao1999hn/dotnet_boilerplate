@@ -7,13 +7,14 @@ namespace Infrastructure
 {
     public class UnitOfWork : IUnitOfWork
     {
+        public IRepository<Product> productRepository { get;}
         private bool disposedValue;
-        private readonly Dictionary<string, object> repositories = new Dictionary<string, object>();
         private BoilerPlateDbContext _context { get; set; }
 
-        public UnitOfWork(BoilerPlateDbContext context)
+        public UnitOfWork(BoilerPlateDbContext context, IRepository<Product> productRepository)
         {
             _context = context;
+            this.productRepository = productRepository;
         }
 
         public async Task<bool> CommitTransactionAsync(CancellationToken cancellationToken = default, Guid? internalCommandId = null)
@@ -29,20 +30,7 @@ namespace Infrastructure
         {
             await _context.Database.RollbackTransactionAsync();
         }
-
-        public IRepository<T> GetRepository<T>() where T : BaseEntity, IAggregateRoot
-        {
-            string typeName = typeof(T).Name;
-            if (repositories.Keys.Contains(typeName))
-            {
-                return repositories[typeName] as IRepository<T>;
-            }
-            IRepository<T> newRepository = new Repository<T>(_context);
-
-            repositories.Add(typeName, newRepository);
-            return newRepository;
-        }
-
+        
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)

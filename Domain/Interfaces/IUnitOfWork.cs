@@ -5,8 +5,7 @@ namespace Infrastructure
 {
     public interface IUnitOfWork : IDisposable
     {
-        IRepository<T> GetRepository<T>() where T : BaseEntity, IAggregateRoot;
-
+        public IRepository<Product> productRepository { get; }
         Task<bool> CommitTransactionAsync(CancellationToken cancellationToken = default, Guid? internalCommandId = null);
 
         Task RollBackTransactionAsync();

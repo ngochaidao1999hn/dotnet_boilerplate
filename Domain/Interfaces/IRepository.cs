@@ -5,11 +5,13 @@ namespace Domain.Interfaces
 {
     public interface IRepository<T> where T : BaseEntity, IAggregateRoot
     {
+        IQueryable<T> Table { get; }
+
         Task<T> CreateAsync(T entity);
 
         void Update(T entity);
 
-        Task<T> GetByIdAsync(int id);
+        Task<T?> GetByIdAsync(int id);
 
         void Delete(int id);
 
