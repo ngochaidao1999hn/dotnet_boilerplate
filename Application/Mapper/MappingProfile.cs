@@ -1,5 +1,4 @@
-﻿using Application.Commands.ProductsCommands;
-using Application.Dtos.Product;
+﻿using Application.Dtos.Product;
 using AutoMapper;
 using Domain.Entities;
 

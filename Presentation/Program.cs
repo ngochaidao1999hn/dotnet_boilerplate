@@ -56,6 +56,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-InfraDependencyResolverService.Configure();
+InfraDependencyResolverService.JobConfigure();
 
 app.Run();

@@ -14,7 +14,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task AddHangFire()
+        public void AddHangFire()
         {
             RecurringJob.AddOrUpdate("test", () => Console.WriteLine("HAHA"), Cron.Minutely);
         }

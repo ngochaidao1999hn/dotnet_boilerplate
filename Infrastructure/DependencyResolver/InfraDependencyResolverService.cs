@@ -65,8 +65,8 @@ namespace Infrastructure.DependencyResolver
             services.AddStackExchangeRedisCache(options => { options.Configuration = Configuration["REDIS:ConnectionString"]; });
         }
 
-        //Register Jobs
-        public static void Configure()
+        //Job Register
+        public static void JobConfigure()
         {
             RecurringJob.AddOrUpdate<Jobs>("g1", job => job.SendGetRequest(), Cron.Minutely());
         }
